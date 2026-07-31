@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2026-07-31 17:13:20
  * @LastEditors: LetMeFly.xyz
- * @LastEditTime: 2026-07-31 17:43:45
+ * @LastEditTime: 2026-07-31 17:59:22
 -->
 # my_docker_pull
 
@@ -12,42 +12,38 @@
 
 ```mermaid
 flowchart TD
-    A[目标服务器<br/>执行 my_docker_pull IMAGE:TAG] --> B{本地是否存在镜像?}
+    Begin[执行 my_docker_pull IMAGE:TAG] --> HasLocal{本地是否存在镜像?}
 
-    B -->|是| C[直接使用镜像]
+    HasLocal -->|是|Done
 
-    B -->|否| D{阿里云私有镜像仓库<br/>是否存在?}
+    HasLocal -->|否| HasRegistry{阿里云私有镜像仓库<br/>是否存在?}
 
-    D -->|是| E[从阿里云拉取镜像<br/>（SHA校验）]
-    E --> F[返回镜像]
+    HasRegistry -->|是| PullFromRegistryDirectly[从阿里云拉取镜像<br/>（SHA校验）]
+    PullFromRegistryDirectly --> Done
 
-    D -->|否| G[API触发 GitHub Actions]
+    HasRegistry -->|否| G[API触发 GitHub Actions]
 
     G --> H[GitHub Actions<br/>拉取源镜像并推送到<br/>阿里云私有镜像仓库]
 
-    H --> I[Callback Hook<br/>通知目标服务器]
+    H --> Callback[Callback Hook<br/>通知目标服务器]
 
-    I --> J[从阿里云拉取镜像<br/>SHA校验]
+    Callback --> PullFromRegistryAndCheck[从阿里云拉取镜像<br/>SHA校验]
 
-    J --> F
+    PullFromRegistryAndCheck --> Done
 
 
     subgraph Server[目标服务器]
-        A
-        B
-        D
-        E
-        I
-        J
+        Begin
+        HasLocal
+        HasRegistry
+        PullFromRegistryDirectly
+        Callback
+        PullFromRegistryAndCheck
+        Done
     end
 
     subgraph GitHub[GitHub]
         G
-        H
-    end
-
-    subgraph ACR[阿里云私有镜像仓库<br/>Docker镜像缓存层]
-        E
         H
     end
 ```
