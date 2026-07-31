@@ -19,10 +19,15 @@ jobs:
         run: |
           docker images "${{ github.event.client_payload.image }}"
       
-      - name: Login Aliyun Registry
+      - name: Push into Aliyun Registry
         env:
           ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
           ALIYUN_DOCKER_PWD: ${{ secrets.ALIYUN_DOCKER_PWD }}
           ALIYUN_DOCKER_REGISTRY: ${{ secrets.ALIYUN_DOCKER_REGISTRY }}
+          ALIYUN_DOCKER_NAMESPACE: ${{ secrets.ALIYUN_DOCKER_NAMESPACE }}
         run: |
           echo "$ALIYUN_DOCKER_PWD" | docker login -u "$ALIYUN_DOCKER_USERNAME" --password-stdin "$ALIYUN_DOCKER_REGISTRY"
+          docker_aliyun_name="$ALIYUN_DOCKER_REGISTRY/$ALIYUN_DOCKER_NAMESPACE/${{ github.event.client_payload.image }}"
+          docker tag "${{ github.event.client_payload.image }}" "$docker_aliyun_name"
+          docker push "$docker_aliyun_name"
+

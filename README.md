@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2026-07-31 17:13:20
  * @LastEditors: LetMeFly.xyz
- * @LastEditTime: 2026-07-31 22:14:46
+ * @LastEditTime: 2026-07-31 22:26:14
 -->
 # my_docker_pull
 
@@ -55,6 +55,7 @@ flowchart TD
 + ALIYUN_DOCKER_USERNAME
 + ALIYUN_DOCKER_PWD
 + ALIYUN_DOCKER_REGISTRY
++ ALIYUN_DOCKER_NAMESPACE
 
 trigger a workflow:
 
