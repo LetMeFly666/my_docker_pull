@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2026-07-31 17:13:20
  * @LastEditors: LetMeFly.xyz
- * @LastEditTime: 2026-07-31 17:59:22
+ * @LastEditTime: 2026-07-31 22:14:46
 -->
 # my_docker_pull
 
@@ -47,6 +47,32 @@ flowchart TD
         H
     end
 ```
+
+## How to use
+
+[新建](https://github.com/LetMeFly666/my_docker_pull/settings/secrets/actions/new)action环境变量：
+
++ ALIYUN_DOCKER_USERNAME
++ ALIYUN_DOCKER_PWD
++ ALIYUN_DOCKER_REGISTRY
+
+trigger a workflow:
+
+```bash
+curl \
+  -X POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GITHUB_TOKEN" \
+  https://api.github.com/repos/LetMeFly666/my_docker_pull/dispatches \
+  -d '{
+    "event_type": "docker-pull",
+    "client_payload": {
+      "image": "hello-world:latest"
+    }
+  }'
+```
+
+其中`$GITHUB_TOKEN`是[Fine-grained personal access tokens](https://github.com/settings/personal-access-tokens)，需要勾选`Contents`的`Read&Write`权限。
 
 ## 致谢
 

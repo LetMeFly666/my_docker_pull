@@ -18,3 +18,7 @@ jobs:
       - name: Show image
         run: |
           docker images "${{ github.event.client_payload.image }}"
+      
+      - name: Login Aliyun Registry
+        run: |
+          docker login -u "${{ secrets.ALIYUN_DOCKER_USER }}" -p "${{ secrets.ALIYUN_DOCKER_PWD }}" "${{ secrets.ALIYUN_DOCKER_REGISTRY }}"
