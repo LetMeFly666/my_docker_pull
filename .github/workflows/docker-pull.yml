@@ -20,5 +20,9 @@ jobs:
           docker images "${{ github.event.client_payload.image }}"
       
       - name: Login Aliyun Registry
+        env:
+          ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
+          ALIYUN_DOCKER_PWD: ${{ secrets.ALIYUN_DOCKER_PWD }}
+          ALIYUN_DOCKER_REGISTRY: ${{ secrets.ALIYUN_DOCKER_REGISTRY }}
         run: |
-          docker login -u "${{ secrets.ALIYUN_DOCKER_USER }}" -p "${{ secrets.ALIYUN_DOCKER_PWD }}" "${{ secrets.ALIYUN_DOCKER_REGISTRY }}"
+          echo "$ALIYUN_DOCKER_PWD" | docker login -u "$ALIYUN_DOCKER_USERNAME" --password-stdin "$ALIYUN_DOCKER_REGISTRY"
