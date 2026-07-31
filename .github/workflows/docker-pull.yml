@@ -1,0 +1,20 @@
+name: Docker Pull
+
+on:
+  repository_dispatch:
+    types:
+      - docker-pull
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull Docker image
+        run: |
+          echo "Pulling image: ${{ github.event.client_payload.image }}"
+          docker pull "${{ github.event.client_payload.image }}"
+
+      - name: Show image
+        run: |
+          docker images "${{ github.event.client_payload.image }}"
