@@ -1,33 +1,41 @@
 name: Docker Pull
+run-name: pulling ${{ github.event.client_payload.image }}
 
 on:
   repository_dispatch:
     types:
-      - docker-pull
+      - update-docker
 
 jobs:
   pull:
     runs-on: ubuntu-latest
 
+    env:
+        ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
+        ALIYUN_DOCKER_PWD: ${{ secrets.ALIYUN_DOCKER_PWD }}
+        ALIYUN_DOCKER_REGISTRY: ${{ secrets.ALIYUN_DOCKER_REGISTRY }}
+        ALIYUN_DOCKER_NAMESPACE: ${{ secrets.ALIYUN_DOCKER_NAMESPACE }}
+    
     steps:
+      - name: Set Docker image names
+        run: |
+          echo "DOCKER_IMAGE=${{ github.event.client_payload.image }}" >> "$GITHUB_ENV"
+          echo "DOCKER_ALIYUN_NAME=$ALIYUN_DOCKER_REGISTRY/$ALIYUN_DOCKER_NAMESPACE/${{ github.event.client_payload.image }}" >> "$GITHUB_ENV"
+      
       - name: Pull Docker image
         run: |
           echo "Pulling image: ${{ github.event.client_payload.image }}"
           docker pull "${{ github.event.client_payload.image }}"
-
+      
       - name: Show image
         run: |
           docker images "${{ github.event.client_payload.image }}"
       
-      - name: Push into Aliyun Registry
-        env:
-          ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
-          ALIYUN_DOCKER_PWD: ${{ secrets.ALIYUN_DOCKER_PWD }}
-          ALIYUN_DOCKER_REGISTRY: ${{ secrets.ALIYUN_DOCKER_REGISTRY }}
-          ALIYUN_DOCKER_NAMESPACE: ${{ secrets.ALIYUN_DOCKER_NAMESPACE }}
+      - name: Login into Aliyun Registry
         run: |
           echo "$ALIYUN_DOCKER_PWD" | docker login -u "$ALIYUN_DOCKER_USERNAME" --password-stdin "$ALIYUN_DOCKER_REGISTRY"
-          docker_aliyun_name="$ALIYUN_DOCKER_REGISTRY/$ALIYUN_DOCKER_NAMESPACE/${{ github.event.client_payload.image }}"
-          docker tag "${{ github.event.client_payload.image }}" "$docker_aliyun_name"
-          docker push "$docker_aliyun_name"
-
+      
+      - name: Push into Aliyun Registry
+        run: |
+          docker tag "${{ github.event.client_payload.image }}" "$DOCKER_ALIYUN_NAME"
+          docker push "$DOCKER_ALIYUN_NAME"
