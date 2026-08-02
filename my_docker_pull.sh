@@ -3,7 +3,7 @@
  # @Author: LetMeFly
  # @Date: 2026-08-01 22:40:44
  # @LastEditors: LetMeFly.xyz
- # @LastEditTime: 2026-08-02 11:23:26
+ # @LastEditTime: 2026-08-02 11:27:20
 ### 
 
 set -euo pipefail
@@ -29,7 +29,7 @@ coproc CALLBACK_SERVER {
 }
 
 cleanup() {
-    if [ -n "$CALLBACK_SERVER_PID" ] && kill -0 "$CALLBACK_SERVER_PID" 2>/dev/null; then
+    if [ -n "${CALLBACK_SERVER_PID:-}" ] && kill -0 "$CALLBACK_SERVER_PID" 2>/dev/null; then
         echo "Stopping callback server..."
         kill "$CALLBACK_SERVER_PID" 2>/dev/null || true
         wait "$CALLBACK_SERVER_PID" 2>/dev/null || true
@@ -64,7 +64,6 @@ echo "waiting callback..."
 
 read -r CALLBACK_RESULT <&"${CALLBACK_SERVER[0]}"
 
-wait "$CALLBACK_SERVER_PID"
 
 echo "$CALLBACK_RESULT"
 
