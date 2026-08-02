@@ -3,7 +3,7 @@
  # @Author: LetMeFly
  # @Date: 2026-08-01 22:40:44
  # @LastEditors: LetMeFly.xyz
- # @LastEditTime: 2026-08-02 11:11:31
+ # @LastEditTime: 2026-08-02 11:23:26
 ### 
 
 set -euo pipefail
@@ -29,7 +29,7 @@ coproc CALLBACK_SERVER {
 }
 
 cleanup() {
-    if kill -0 "$CALLBACK_SERVER_PID" 2>/dev/null; then
+    if [ -n "$CALLBACK_SERVER_PID" ] && kill -0 "$CALLBACK_SERVER_PID" 2>/dev/null; then
         echo "Stopping callback server..."
         kill "$CALLBACK_SERVER_PID" 2>/dev/null || true
         wait "$CALLBACK_SERVER_PID" 2>/dev/null || true
@@ -76,9 +76,8 @@ echo "Pulling $DOCKER_IMAGE..."
 docker pull "$DOCKER_IMAGE"
 
 ACTUAL_SHA=$(docker inspect \
-    --format='{{index .RepoDigests 0}}' \
-    "$DOCKER_IMAGE" |
-    sed 's/.*@//'
+    --format='{{.Id}}' \
+    "$DOCKER_IMAGE"
 )
 
 echo "Expected SHA: $EXPECTED_SHA"

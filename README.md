@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2026-07-31 17:13:20
  * @LastEditors: LetMeFly.xyz
- * @LastEditTime: 2026-08-02 09:04:03
+ * @LastEditTime: 2026-08-02 11:24:07
 -->
 # my_docker_pull
 
@@ -80,6 +80,9 @@ curl \
 ## ToDO
 
 - [ ] 二级路径名
+- [ ] re tag
+- [ ] rm when failed
+- [ ] private registry url支持
 
 ## 致谢
 

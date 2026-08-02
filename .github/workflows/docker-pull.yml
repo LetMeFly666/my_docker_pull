@@ -36,9 +36,8 @@ jobs:
       - name: Get image SHA
         run: |
           SHA=$(docker inspect \
-            --format='{{index .RepoDigests 0}}' \
-            "$DOCKER_IMAGE" |
-            sed 's/.*@//'
+            --format='{{.Id}}' \
+            "$DOCKER_IMAGE"
           )
           echo "SHA=$SHA" >> "$GITHUB_ENV"
       
