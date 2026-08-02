@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2026-07-31 17:13:20
  * @LastEditors: LetMeFly.xyz
- * @LastEditTime: 2026-08-02 11:54:40
+ * @LastEditTime: 2026-08-02 14:02:47
 -->
 # my_docker_pull
 
@@ -59,7 +59,7 @@ flowchart TD
 + SERVER_CALLBACK_URL
 + SERVER_CALLBACK_TOKEN
 
-trigger a workflow:
+trigger a workflow原理:
 
 ```bash
 curl \
@@ -75,6 +75,8 @@ curl \
   }'
 ```
 
+--aliyun-vpc
+
 其中`$GITHUB_TOKEN`是[Fine-grained personal access tokens](https://github.com/settings/personal-access-tokens)，需要勾选`Contents`的`Read&Write`权限。
 
 ## ToDO
@@ -82,7 +84,8 @@ curl \
 - [x] 二级路径名 如 （gcr.io/google-containers/pause:latest）
 - [x] re tag
 - [x] rm when failed
-- [ ] private registry url支持
+- [x] private registry url支持
+- [ ] 最大超时机制？
 
 ## 致谢
 

@@ -3,7 +3,7 @@
  # @Author: LetMeFly
  # @Date: 2026-08-01 22:40:44
  # @LastEditors: LetMeFly.xyz
- # @LastEditTime: 2026-08-02 11:56:34
+ # @LastEditTime: 2026-08-02 14:05:34
 ### 
 
 set -euo pipefail
@@ -17,6 +17,20 @@ CALLBACK_TOKEN="${CALLBACK_TOKEN:?CALLBACK_TOKEN is not set}"
 REQ_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 echo "Request ID: $REQ_ID"
 
+ALIYUN_VPC=false
+shift || true
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --aliyun-vpc)
+            ALIYUN_VPC=true
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 echo "Starting callback server"
 
@@ -68,6 +82,9 @@ read -r CALLBACK_RESULT <&"${CALLBACK_SERVER[0]}"
 echo "$CALLBACK_RESULT"
 
 DOCKER_IMAGE=$(echo "$CALLBACK_RESULT" | jq -r '.DOCKER_ALIYUN_NAME')
+if [ "$ALIYUN_VPC" = true ]; then
+    DOCKER_IMAGE="${DOCKER_IMAGE/./-vpc.}"
+fi
 EXPECTED_SHA=$(echo "$CALLBACK_RESULT" | jq -r '.sha')
 
 echo "Pulling $DOCKER_IMAGE..."
