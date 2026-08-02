@@ -3,7 +3,7 @@
  # @Author: LetMeFly
  # @Date: 2026-08-01 22:40:44
  # @LastEditors: LetMeFly.xyz
- # @LastEditTime: 2026-08-02 11:27:20
+ # @LastEditTime: 2026-08-02 11:53:10
 ### 
 
 set -euo pipefail
@@ -84,7 +84,12 @@ echo "Actual SHA:   $ACTUAL_SHA"
 
 if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
     echo "SHA mismatch!" >&2
+    docker rmi "$DOCKER_IMAGE" >/dev/null 2>&1 || true
     exit 1
 fi
 
 echo "SHA verified."
+echo "Tagging as $ORIGINAL_IMAGE..."
+docker tag "$DOCKER_IMAGE" "$ORIGINAL_IMAGE"
+docker rmi "$DOCKER_IMAGE" >/dev/null 2>&1 || true
+echo "Done: $ORIGINAL_IMAGE"

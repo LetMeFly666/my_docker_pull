@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2026-07-31 17:13:20
  * @LastEditors: LetMeFly.xyz
- * @LastEditTime: 2026-08-02 11:24:07
+ * @LastEditTime: 2026-08-02 11:54:40
 -->
 # my_docker_pull
 
@@ -79,9 +79,9 @@ curl \
 
 ## ToDO
 
-- [ ] 二级路径名
-- [ ] re tag
-- [ ] rm when failed
+- [x] 二级路径名 如 （gcr.io/google-containers/pause:latest）
+- [x] re tag
+- [x] rm when failed
 - [ ] private registry url支持
 
 ## 致谢
@@ -92,4 +92,5 @@ Idea inspeared by [Github@you8023/docker_images_sync](https://github.com/you8023
 + 无需每次产生非feat的commit记录，改用api触发action
 + 改用回调机制，GitHub Workflow推送至阿里云镜像后hook主机，无需每20秒轮询
 + 拉取后校验sha
-+ 检查本地及阿里云私有容器服务是否已经存在该镜像，若已存在则不再触发GitHub工作流
+
+本仓库写了依托，欢迎去灵感来源仓库点star。
