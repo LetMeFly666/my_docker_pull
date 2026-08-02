@@ -3,7 +3,7 @@
  # @Author: LetMeFly
  # @Date: 2026-08-01 22:40:44
  # @LastEditors: LetMeFly.xyz
- # @LastEditTime: 2026-08-02 09:39:05
+ # @LastEditTime: 2026-08-02 09:40:26
 ### 
 
 set -euo pipefail
@@ -28,13 +28,14 @@ curl \
     "https://api.github.com/repos/$REPO/dispatches" \
     -d "
         {
-            \"event_type\": \"update-docker\",
+            \"event_type\": \"docker-pull\",
             \"client_payload\": {
                 \"image\": \"$IMAGE\",
                 \"req_id\": \"$REQ_ID\"
             }
         }
     "
+echo "triggered"
 
 
 # TODO: receiver must be ready before sender starts
