@@ -3,7 +3,7 @@
  # @Author: LetMeFly
  # @Date: 2026-08-01 22:40:44
  # @LastEditors: LetMeFly.xyz
- # @LastEditTime: 2026-08-02 09:40:26
+ # @LastEditTime: 2026-08-02 10:45:35
 ### 
 
 set -euo pipefail
@@ -18,9 +18,32 @@ REQ_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 echo "Request ID: $REQ_ID"
 
 
+echo "Starting callback server"
+
+
+python3 callback_server.py \
+    --port "$PORT" \
+    --req-id "$REQ_ID" \
+    --token "$CALLBACK_TOKEN" \
+    > callback_result.json &
+
+SERVER_PID=$!
+cleanup() {
+    if kill -0 "$SERVER_PID" 2>/dev/null; then
+        echo "Stopping callback server..."
+        kill "$SERVER_PID" 2>/dev/null || true
+        wait "$SERVER_PID" 2>/dev/null || true
+    fi
+}
+trap cleanup EXIT INT TERM
+
+
+# sleep 1
 
 
 echo "Dispatch workflow..."
+
+
 curl \
     -X POST \
     -H "Accept: application/vnd.github+json" \
@@ -35,8 +58,11 @@ curl \
             }
         }
     "
-echo "triggered"
 
 
-# TODO: receiver must be ready before sender starts
-nc -l 8759
+echo "waiting callback..."
+
+wait $SERVER_PID
+
+
+cat callback_result.json

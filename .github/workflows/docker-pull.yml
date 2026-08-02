@@ -58,8 +58,10 @@ jobs:
             "$SERVER_CALLBACK_URL" \
             -H "Content-Type:text/plain" \
             -d "
-            req_id=${{ github.event.client_payload.req_id }}
-            DOCKER_ALIYUN_NAME=$DOCKER_ALIYUN_NAME
-            sha=$SHA
-            token=$CALLBACK_TOKEN
+              {
+                \"req_id\": \"${{ github.event.client_payload.req_id }}\",
+                \"DOCKER_ALIYUN_NAME\": \"$DOCKER_ALIYUN_NAME\",
+                \"sha\": \"$SHA\",
+                \"token\": \"$SERVER_CALLBACK_TOKEN\"
+              }
             "
