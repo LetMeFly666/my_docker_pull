@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2026-07-31 17:13:20
  * @LastEditors: LetMeFly.xyz
- * @LastEditTime: 2026-08-02 14:02:47
+ * @LastEditTime: 2026-08-02 14:44:38
 -->
 # my_docker_pull
 
@@ -12,39 +12,41 @@
 
 ```mermaid
 flowchart TD
-    Begin[执行 my_docker_pull IMAGE:TAG] --> HasLocal{本地是否存在镜像?}
+    Begin[执行 my_docker_pull IMAGE:TAG]
+    ListenBegin[开始监听callback]
+    GithubPull[docker pull]
+    GithubCallback[回调服务器]
+    ServerPull[拉取镜像]
+    Verify1[token鉴权、reqid匹配]
+    Verify2{sha校验}
+    Delete[删除镜像]
 
-    HasLocal -->|是|Done
+    Begin-->ListenBegin
+    ListenBegin-->|image、reqid|GithubPull
+    GithubPull-->|login、push image|Aliyun
+    Aliyun-->GithubCallback
+    GithubCallback-->|reqid、token、image sha、aliyun image path|Verify1
+    Verify1-->ServerPull
+    Aliyun-->ServerPull
+    ServerPull-->Verify2
+    Verify2-->|N|Delete
+    Verify2-->|Y|Done
 
-    HasLocal -->|否| HasRegistry{阿里云私有镜像仓库<br/>是否存在?}
-
-    HasRegistry -->|是| PullFromRegistryDirectly[从阿里云拉取镜像<br/>（SHA校验）]
-    PullFromRegistryDirectly --> Done
-
-    HasRegistry -->|否| G[API触发 GitHub Actions]
-
-    G --> H[GitHub Actions<br/>拉取源镜像并推送到<br/>阿里云私有镜像仓库]
-
-    H --> Callback[Callback Hook<br/>通知目标服务器]
-
-    Callback --> PullFromRegistryAndCheck[从阿里云拉取镜像<br/>SHA校验]
-
-    PullFromRegistryAndCheck --> Done
-
-
-    subgraph Server[目标服务器]
+    subgraph Server[服务器]
         Begin
-        HasLocal
-        HasRegistry
-        PullFromRegistryDirectly
-        Callback
-        PullFromRegistryAndCheck
+        Verify1
+        ServerPull
+        Verify2
+        Delete
         Done
     end
 
-    subgraph GitHub[GitHub]
-        G
-        H
+    subgraph Aliyun[阿里云Registry]
+    end
+
+    subgraph GitHub[GitHub Workflow]
+        GithubPull
+        GithubCallback
     end
 ```
 
@@ -63,16 +65,16 @@ trigger a workflow原理:
 
 ```bash
 curl \
-  -X POST \
-  -H "Accept: application/vnd.github+json" \
-  -H "Authorization: Bearer $GITHUB_TOKEN" \
-  https://api.github.com/repos/LetMeFly666/my_docker_pull/dispatches \
-  -d '{
-    "event_type": "docker-pull",
-    "client_payload": {
-      "image": "hello-world:latest"
-    }
-  }'
+    -X POST \
+    -H "Accept: application/vnd.github+json" \
+    -H "Authorization: Bearer $GITHUB_TOKEN" \
+    https://api.github.com/repos/LetMeFly666/my_docker_pull/dispatches \
+    -d '{
+        "event_type": "docker-pull",
+        "client_payload": {
+        "image": "hello-world:latest"
+        }
+    }'
 ```
 
 --aliyun-vpc
