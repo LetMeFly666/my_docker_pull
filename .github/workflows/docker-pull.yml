@@ -1,41 +1,65 @@
 name: Docker Pull
+
 run-name: pulling ${{ github.event.client_payload.image }}
 
 on:
   repository_dispatch:
     types:
-      - update-docker
+      - docker-pull
 
 jobs:
   pull:
     runs-on: ubuntu-latest
 
     env:
-        ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
-        ALIYUN_DOCKER_PWD: ${{ secrets.ALIYUN_DOCKER_PWD }}
-        ALIYUN_DOCKER_REGISTRY: ${{ secrets.ALIYUN_DOCKER_REGISTRY }}
-        ALIYUN_DOCKER_NAMESPACE: ${{ secrets.ALIYUN_DOCKER_NAMESPACE }}
+      ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
+      ALIYUN_DOCKER_PWD: ${{ secrets.ALIYUN_DOCKER_PWD }}
+      ALIYUN_DOCKER_REGISTRY: ${{ secrets.ALIYUN_DOCKER_REGISTRY }}
+      ALIYUN_DOCKER_NAMESPACE: ${{ secrets.ALIYUN_DOCKER_NAMESPACE }}
+      SERVER_CALLBACK_URL: ${{ secrets.SERVER_CALLBACK_URL }}
+      SERVER_CALLBACK_TOKEN: ${{ secrets.SERVER_CALLBACK_TOKEN }}
     
     steps:
-      - name: Set Docker image names
+      - name: Prepare image name
         run: |
-          echo "DOCKER_IMAGE=${{ github.event.client_payload.image }}" >> "$GITHUB_ENV"
-          echo "DOCKER_ALIYUN_NAME=$ALIYUN_DOCKER_REGISTRY/$ALIYUN_DOCKER_NAMESPACE/${{ github.event.client_payload.image }}" >> "$GITHUB_ENV"
+          IMAGE="${{ github.event.client_payload.image }}"
+          # 阿里云不支持多级repo
+          ALIYUN_IMAGE=$(echo "$IMAGE" | tr '/' '-')
+          echo "DOCKER_IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          echo "DOCKER_ALIYUN_NAME=$ALIYUN_DOCKER_REGISTRY/$ALIYUN_DOCKER_NAMESPACE/$ALIYUN_IMAGE" >> "$GITHUB_ENV"
       
       - name: Pull Docker image
         run: |
           echo "Pulling image: ${{ github.event.client_payload.image }}"
           docker pull "${{ github.event.client_payload.image }}"
       
-      - name: Show image
+      - name: Get image SHA
         run: |
-          docker images "${{ github.event.client_payload.image }}"
+          SHA=$(docker inspect \
+            --format='{{index .RepoDigests 0}}' \
+            "$DOCKER_IMAGE" |
+            sed 's/.*@//'
+          )
+          echo "SHA=$SHA" >> "$GITHUB_ENV"
       
       - name: Login into Aliyun Registry
         run: |
           echo "$ALIYUN_DOCKER_PWD" | docker login -u "$ALIYUN_DOCKER_USERNAME" --password-stdin "$ALIYUN_DOCKER_REGISTRY"
       
-      - name: Push into Aliyun Registry
+      - name: Push Aliyun
         run: |
-          docker tag "${{ github.event.client_payload.image }}" "$DOCKER_ALIYUN_NAME"
+          docker tag "$DOCKER_IMAGE" "$DOCKER_ALIYUN_NAME"
           docker push "$DOCKER_ALIYUN_NAME"
+      
+      - name: Callback server
+        run: |
+          curl \
+            -X POST \
+            "$SERVER_CALLBACK_URL" \
+            -H "Content-Type:text/plain" \
+            -d "
+            req_id=${{ github.event.client_payload.req_id }}
+            DOCKER_ALIYUN_NAME=$DOCKER_ALIYUN_NAME
+            sha=$SHA
+            token=$CALLBACK_TOKEN
+            "
