@@ -3,7 +3,7 @@
  # @Author: LetMeFly
  # @Date: 2026-08-01 22:40:44
  # @LastEditors: LetMeFly.xyz
- # @LastEditTime: 2026-08-02 10:45:35
+ # @LastEditTime: 2026-08-02 11:11:31
 ### 
 
 set -euo pipefail
@@ -21,18 +21,18 @@ echo "Request ID: $REQ_ID"
 echo "Starting callback server"
 
 
-python3 callback_server.py \
-    --port "$PORT" \
-    --req-id "$REQ_ID" \
-    --token "$CALLBACK_TOKEN" \
-    > callback_result.json &
+coproc CALLBACK_SERVER {
+    python3 callback_server.py \
+        --port "$PORT" \
+        --req-id "$REQ_ID" \
+        --token "$CALLBACK_TOKEN"
+}
 
-SERVER_PID=$!
 cleanup() {
-    if kill -0 "$SERVER_PID" 2>/dev/null; then
+    if kill -0 "$CALLBACK_SERVER_PID" 2>/dev/null; then
         echo "Stopping callback server..."
-        kill "$SERVER_PID" 2>/dev/null || true
-        wait "$SERVER_PID" 2>/dev/null || true
+        kill "$CALLBACK_SERVER_PID" 2>/dev/null || true
+        wait "$CALLBACK_SERVER_PID" 2>/dev/null || true
     fi
 }
 trap cleanup EXIT INT TERM
@@ -62,7 +62,31 @@ curl \
 
 echo "waiting callback..."
 
-wait $SERVER_PID
+read -r CALLBACK_RESULT <&"${CALLBACK_SERVER[0]}"
 
+wait "$CALLBACK_SERVER_PID"
 
-cat callback_result.json
+echo "$CALLBACK_RESULT"
+
+DOCKER_IMAGE=$(echo "$CALLBACK_RESULT" | jq -r '.DOCKER_ALIYUN_NAME')
+EXPECTED_SHA=$(echo "$CALLBACK_RESULT" | jq -r '.sha')
+
+echo "Pulling $DOCKER_IMAGE..."
+
+docker pull "$DOCKER_IMAGE"
+
+ACTUAL_SHA=$(docker inspect \
+    --format='{{index .RepoDigests 0}}' \
+    "$DOCKER_IMAGE" |
+    sed 's/.*@//'
+)
+
+echo "Expected SHA: $EXPECTED_SHA"
+echo "Actual SHA:   $ACTUAL_SHA"
+
+if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
+    echo "SHA mismatch!" >&2
+    exit 1
+fi
+
+echo "SHA verified."
