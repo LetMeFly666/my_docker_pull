@@ -3,7 +3,7 @@
  # @Author: LetMeFly
  # @Date: 2026-08-01 22:40:44
  # @LastEditors: LetMeFly.xyz
- # @LastEditTime: 2026-08-02 14:05:34
+ # @LastEditTime: 2026-08-02 14:10:50
 ### 
 
 set -euo pipefail
@@ -83,7 +83,11 @@ echo "$CALLBACK_RESULT"
 
 DOCKER_IMAGE=$(echo "$CALLBACK_RESULT" | jq -r '.DOCKER_ALIYUN_NAME')
 if [ "$ALIYUN_VPC" = true ]; then
-    DOCKER_IMAGE="${DOCKER_IMAGE/./-vpc.}"
+    if [[ "$DOCKER_IMAGE" != *.personal.cr.aliyuncs.com/* ]]; then
+        echo "Not an Aliyun personal registry image: $DOCKER_IMAGE" >&2
+    else
+        DOCKER_IMAGE="${DOCKER_IMAGE/./-vpc.}"
+    fi
 fi
 EXPECTED_SHA=$(echo "$CALLBACK_RESULT" | jq -r '.sha')
 
