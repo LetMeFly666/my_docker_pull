@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2026-07-31 17:13:20
  * @LastEditors: LetMeFly.xyz
- * @LastEditTime: 2026-08-02 14:44:38
+ * @LastEditTime: 2026-08-02 15:02:40
 -->
 # my_docker_pull
 
@@ -13,7 +13,6 @@
 ```mermaid
 flowchart TD
     Begin[执行 my_docker_pull IMAGE:TAG]
-    ListenBegin[开始监听callback]
     GithubPull[docker pull]
     GithubCallback[回调服务器]
     ServerPull[拉取镜像]
@@ -21,8 +20,7 @@ flowchart TD
     Verify2{sha校验}
     Delete[删除镜像]
 
-    Begin-->ListenBegin
-    ListenBegin-->|image、reqid|GithubPull
+    Begin-->|image、reqid|GithubPull
     GithubPull-->|login、push image|Aliyun
     Aliyun-->GithubCallback
     GithubCallback-->|reqid、token、image sha、aliyun image path|Verify1
@@ -54,8 +52,8 @@ flowchart TD
 
 [新建](https://github.com/LetMeFly666/my_docker_pull/settings/secrets/actions/new)action环境变量：
 
-+ ALIYUN_DOCKER_USERNAME
-+ ALIYUN_DOCKER_PWD
++ ALIYUN_DOCKER_USERNAME：你的阿里云主账号用户名
++ ALIYUN_DOCKER_PWD：
 + ALIYUN_DOCKER_REGISTRY
 + ALIYUN_DOCKER_NAMESPACE
 + SERVER_CALLBACK_URL
@@ -78,6 +76,9 @@ curl \
 ```
 
 --aliyun-vpc
+
+hello-world:latest
+
 
 其中`$GITHUB_TOKEN`是[Fine-grained personal access tokens](https://github.com/settings/personal-access-tokens)，需要勾选`Contents`的`Read&Write`权限。
 

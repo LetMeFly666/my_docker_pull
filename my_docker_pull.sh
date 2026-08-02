@@ -3,7 +3,7 @@
  # @Author: LetMeFly
  # @Date: 2026-08-01 22:40:44
  # @LastEditors: LetMeFly.xyz
- # @LastEditTime: 2026-08-02 14:10:50
+ # @LastEditTime: 2026-08-02 15:02:21
 ### 
 
 set -euo pipefail
@@ -34,9 +34,9 @@ done
 
 echo "Starting callback server"
 
-
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 coproc CALLBACK_SERVER {
-    python3 callback_server.py \
+    python3 "$SCRIPT_DIR/callback_server.py" \
         --port "$PORT" \
         --req-id "$REQ_ID" \
         --token "$CALLBACK_TOKEN"
