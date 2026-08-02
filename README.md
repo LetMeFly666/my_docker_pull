@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2026-07-31 17:13:20
  * @LastEditors: LetMeFly.xyz
- * @LastEditTime: 2026-08-02 15:02:40
+ * @LastEditTime: 2026-08-02 16:18:55
 -->
 # my_docker_pull
 
@@ -88,6 +88,9 @@ hello-world:latest
 - [x] re tag
 - [x] rm when failed
 - [x] private registry url支持
+
+Cando:
+
 - [ ] 最大超时机制？
 
 ## 致谢

@@ -3,7 +3,7 @@
  # @Author: LetMeFly
  # @Date: 2026-08-01 22:40:44
  # @LastEditors: LetMeFly.xyz
- # @LastEditTime: 2026-08-02 15:02:21
+ # @LastEditTime: 2026-08-02 16:18:38
 ### 
 
 set -euo pipefail
@@ -76,9 +76,24 @@ curl \
 
 echo "waiting callback..."
 
+WAIT_START=$(date +%s)
+
+(
+    while true; do
+        NOW=$(date +%s)
+        ELAPSED=$((NOW - WAIT_START))
+        printf "\rwaiting callback... ${ELAPSED}s"
+        sleep 1
+    done
+) &
+TIMER_PID=$!
+
 read -r CALLBACK_RESULT <&"${CALLBACK_SERVER[0]}"
 
+kill "$TIMER_PID" 2>/dev/null || true
+wait "$TIMER_PID" 2>/dev/null || true
 
+echo
 echo "$CALLBACK_RESULT"
 
 DOCKER_IMAGE=$(echo "$CALLBACK_RESULT" | jq -r '.DOCKER_ALIYUN_NAME')
