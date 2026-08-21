@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2026-07-31 17:13:20
  * @LastEditors: LetMeFly.xyz
- * @LastEditTime: 2026-08-02 16:18:55
+ * @LastEditTime: 2026-08-21 12:12:54
 -->
 # my_docker_pull
 
@@ -48,17 +48,6 @@ flowchart TD
     end
 ```
 
-## How to use
-
-[新建](https://github.com/LetMeFly666/my_docker_pull/settings/secrets/actions/new)action环境变量：
-
-+ ALIYUN_DOCKER_USERNAME：你的阿里云主账号用户名
-+ ALIYUN_DOCKER_PWD：
-+ ALIYUN_DOCKER_REGISTRY
-+ ALIYUN_DOCKER_NAMESPACE
-+ SERVER_CALLBACK_URL
-+ SERVER_CALLBACK_TOKEN
-
 trigger a workflow原理:
 
 ```bash
@@ -75,12 +64,60 @@ curl \
     }'
 ```
 
---aliyun-vpc
+## How to use
 
-hello-world:latest
+共有3处需要配置
 
+### GitHub
+
+Fork本仓库，[新建](https://github.com/LetMeFly666/my_docker_pull/settings/secrets/actions/new)action环境变量：
+
++ ALIYUN_DOCKER_USERNAME：你的阿里云主账号用户名
++ ALIYUN_DOCKER_PWD：你的阿里云私有容器服务密码
++ ALIYUN_DOCKER_REGISTRY：你的专属阿里云私有容器地址（域名）
++ ALIYUN_DOCKER_NAMESPACE：你设置的命名空间
++ SERVER_CALLBACK_URL：回调通知服务器镜像准备好了的地址
++ SERVER_CALLBACK_TOKEN：带上这个token服务器才认同
+
+其中`ALIYUN`开头的环境变量见章节[阿里云私有容器服务](#阿里云私有容器服务)，`SERVER`开头的环境变量见章节[服务器](#服务器)
+
+### 阿里云私有容器服务
+
+访问[阿里云私有容器服务](https://cr.console.aliyun.com/cn-beijing/instance/credentials)，若提示未开通则开通一个（Free），得到以下三个环境变量。
+
+![访问凭证](https://files.letmefly.xyz/d/n/github/my_docker_pull/%E8%AE%BF%E9%97%AE%E5%87%AD%E8%AF%81.png)
+
+点击左侧[命名空间](https://cr.console.aliyun.com/cn-beijing/instance/namespaces)，若还没有就新建一个，名字随意但要记下来，得到另外一个环境变量。
+
+![命名空间](https://files.letmefly.xyz/d/n/github/my_docker_pull/%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4.png)
+
+### 服务器
+
+clone该仓库，拿到`my_docker_pull.sh`，赋予执行权限（`chmod +x my_docker_pull.sh`），执行：
+
+```bash
+GITHUB_TOKEN="github_pat_2878783787" CALLBACK_TOKEN="26337" /path/to/my_docker_pull.sh "$image_name" 
+```
+
+你也可以在`~/.zshrc`或`~/.bashrc`设置alias以达到接近原始`docker pull`的体验：
+
+```bash
+alias my_docker_pull='GITHUB_TOKEN="github_pat_2878783787" CALLBACK_TOKEN="26337" /path/to/my_docker_pull.sh'
+```
+
+如果你是阿里云服务器，也可以使用内网地址活动更大的带宽，只需要在命令中加上参数`--aliyun-vpc`
+
+如：
+
+```bash
+my_docker_pull hello-world:latest
+# 或者
+GITHUB_TOKEN="github_pat_2878783787" CALLBACK_TOKEN="26337" /path/to/my_docker_pull.sh hello-world:latest --aliyun-vpc
+```
 
 其中`$GITHUB_TOKEN`是[Fine-grained personal access tokens](https://github.com/settings/personal-access-tokens)，需要勾选`Contents`的`Read&Write`权限。
+
+其中`CALLBACK_TOKEN`相当于一串你自定义的密码。
 
 ## ToDO
 
