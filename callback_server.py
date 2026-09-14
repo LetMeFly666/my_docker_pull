@@ -29,7 +29,7 @@ class CallbackHandler(BaseHTTPRequestHandler):
         if data.get("token") != self.server.token:
             self.send_error(403, "bad token")
             return
-        print("callback verified", file=sys.stderr)
+        print("\ncallback verified", file=sys.stderr)
 
         self.server.result = data
         self.send_response(200)
